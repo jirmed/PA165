@@ -5,6 +5,6 @@ test-output
 .classpath
 *.iml
 *~
-*.class
 *.jar
+*.class
 target
