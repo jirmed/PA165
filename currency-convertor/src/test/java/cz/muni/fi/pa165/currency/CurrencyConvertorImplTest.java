@@ -5,76 +5,73 @@ import java.util.Currency;
 import static org.hamcrest.core.Is.is;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Rule;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import static org.mockito.Mockito.*;
-import org.mockito.stubbing.OngoingStubbing;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class CurrencyConvertorImplTest {
+
     private static final Currency USD = Currency.getInstance("USD");
     private static final Currency CZK = Currency.getInstance("CZK");
 
     @Mock
-    ExchangeRateTable exchangeRateTableMock = mock(ExchangeRateTable.class);
-
-    @Test
-    public void testConvertZeroAmount() throws ExternalServiceFailureException {
-        when(exchangeRateTableMock.getExchangeRate(any(Currency.class), any(Currency.class))).thenReturn(BigDecimal.TEN);
-        CurrencyConvertorImpl converter = new CurrencyConvertorImpl(exchangeRateTableMock);
-
-        BigDecimal result = converter.convert(CZK, USD, BigDecimal.ZERO);
-        assertThat("Shoud be zero", result, is(BigDecimal.valueOf(0)));
-        // Don't forget to test border values and proper rounding.
-        // fail("Test is not implemented yet.");
-    }
+    ExchangeRateTable exchangeRateTableMock; //= mock(ExchangeRateTable.class);
 
     @Test
     public void testConvert() throws ExternalServiceFailureException {
-        when(exchangeRateTableMock.getExchangeRate(any(Currency.class), any(Currency.class))).thenReturn(BigDecimal.valueOf(20));
+        when(exchangeRateTableMock.getExchangeRate(USD, CZK)).thenReturn(BigDecimal.valueOf(22.123));
         CurrencyConvertorImpl converter = new CurrencyConvertorImpl(exchangeRateTableMock);
-        BigDecimal result = converter.convert(Currency.getInstance("USD"), Currency.getInstance("CZK"), BigDecimal.ONE);
-        assertThat("Shoud be 20", result, is(BigDecimal.valueOf(20)));
-        // Don't forget to test border values and proper rounding.
-        // fail("Test is not implemented yet.");
+        BigDecimal result = converter.convert(USD, CZK, BigDecimal.valueOf(10.15));
+        assertThat(result, is(BigDecimal.valueOf(224.55)));
+    }
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    @Test
+    public void testConvertWithNullSourceCurrency() {
+        CurrencyConvertorImpl converter = new CurrencyConvertorImpl(exchangeRateTableMock);
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Source currency must not be null");
+        converter.convert(null, CZK, BigDecimal.ONE);
     }
 
     @Test
-    public void testConvertWithNullSourceCurrency() throws ExternalServiceFailureException {
-        when(exchangeRateTableMock.getExchangeRate(any(Currency.class), any(Currency.class))).thenReturn(BigDecimal.valueOf(20));
+    public void testConvertWithNullTargetCurrency() {
         CurrencyConvertorImpl converter = new CurrencyConvertorImpl(exchangeRateTableMock);
-        try {
-            BigDecimal result = converter.convert(null, Currency.getInstance("CZK"), BigDecimal.ONE);
-            fail("Should throw exception");
-        } catch (IllegalArgumentException e) {
-            assertThat("Should throw exception",e.getMessage(),is("Source currency may not be null"));
-        }
-    }
-
-    @Test
-    public void testConvertWithNullTargetCurrency() throws ExternalServiceFailureException {
-        when(exchangeRateTableMock.getExchangeRate(any(Currency.class), any(Currency.class))).thenReturn(BigDecimal.valueOf(20));
-        CurrencyConvertorImpl converter = new CurrencyConvertorImpl(exchangeRateTableMock);
-        try {
-            BigDecimal result = converter.convert(null, Currency.getInstance("CZK"), BigDecimal.ONE);
-            fail("Should throw exception");
-        } catch (IllegalArgumentException e) {
-            assertThat("Should throw exception",e.getMessage(),is("Source currency may not be null"));
-        }
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Target currency must not be null");
+        converter.convert(USD, null, BigDecimal.ONE);
     }
 
     @Test
     public void testConvertWithNullSourceAmount() {
-        fail("Test is not implemented yet.");
+        CurrencyConvertorImpl converter = new CurrencyConvertorImpl(exchangeRateTableMock);
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Source amount must not be null");
+        converter.convert(USD, CZK, null);
     }
 
     @Test
-    public void testConvertWithUnknownCurrency() {
-        fail("Test is not implemented yet.");
+    public void testConvertWithUnknownCurrency() throws ExternalServiceFailureException {
+        when(exchangeRateTableMock.getExchangeRate(USD, CZK)).thenReturn(null);
+        CurrencyConvertorImpl converter = new CurrencyConvertorImpl(exchangeRateTableMock);
+        thrown.expect(UnknownExchangeRateException.class);
+        thrown.expectMessage("Unknown rate");
+        converter.convert(USD, CZK, BigDecimal.ONE);
     }
 
     @Test
-    public void testConvertWithExternalServiceFailure() {
-        fail("Test is not implemented yet.");
+    public void testConvertWithExternalServiceFailure() throws ExternalServiceFailureException {
+        when(exchangeRateTableMock.getExchangeRate(USD, CZK)).thenThrow(ExternalServiceFailureException.class);
+        CurrencyConvertorImpl converter = new CurrencyConvertorImpl(exchangeRateTableMock);
+        thrown.expect(UnknownExchangeRateException.class);
+        thrown.expectMessage("Getting Exchange Rate Table failed");
+        converter.convert(USD, CZK, BigDecimal.ONE);
     }
 
 }
