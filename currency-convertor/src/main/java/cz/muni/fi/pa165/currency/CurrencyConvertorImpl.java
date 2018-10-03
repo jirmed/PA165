@@ -1,11 +1,9 @@
 package cz.muni.fi.pa165.currency;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Currency;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.*;
 
 /**
  * This is base implementation of {@link CurrencyConvertor}.
@@ -15,7 +13,7 @@ import java.util.logging.Logger;
 public class CurrencyConvertorImpl implements CurrencyConvertor {
 
     private final ExchangeRateTable exchangeRateTable;
-    //private final Logger logger = LoggerFactory.getLogger(CurrencyConvertorImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(CurrencyConvertorImpl.class);
 
     public CurrencyConvertorImpl(ExchangeRateTable exchangeRateTable) {
         this.exchangeRateTable = exchangeRateTable;
@@ -23,6 +21,7 @@ public class CurrencyConvertorImpl implements CurrencyConvertor {
 
     @Override
     public BigDecimal convert(Currency sourceCurrency, Currency targetCurrency, BigDecimal sourceAmount) {
+        logger.trace("Method start sourceCurrency="+sourceCurrency+" targetCurrency="+targetCurrency+" sourceAmount="+sourceAmount);
         if (sourceCurrency == null) {
             throw new IllegalArgumentException("Source currency must not be null");
         }
@@ -37,10 +36,12 @@ public class CurrencyConvertorImpl implements CurrencyConvertor {
         try {
             rate = exchangeRateTable.getExchangeRate(sourceCurrency, targetCurrency);
         } catch (ExternalServiceFailureException ex) {
-            Logger.getLogger(CurrencyConvertorImpl.class.getName()).log(Level.SEVERE, null, ex);
+//            Logger.getLogger(CurrencyConvertorImpl.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("Getting Exchange Rate Table Failed",ex);
             throw new UnknownExchangeRateException("Getting Exchange Rate Table failed", ex);
         }
         if (rate == null) {
+            logger.warn("Unknown rate sourceCurrency="+sourceCurrency+" targetCurrency="+targetCurrency);
             throw new UnknownExchangeRateException("Unknown rate");
         }
 
