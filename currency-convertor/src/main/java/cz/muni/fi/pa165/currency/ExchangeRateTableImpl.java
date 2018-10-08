@@ -7,11 +7,13 @@ package cz.muni.fi.pa165.currency;
 
 import java.math.BigDecimal;
 import java.util.Currency;
+import javax.inject.Named;
 
 /**
  *
  * @author xmedved4
  */
+@Named
 public class ExchangeRateTableImpl implements ExchangeRateTable {
 
     private static Currency CZK = Currency.getInstance("CZK");
