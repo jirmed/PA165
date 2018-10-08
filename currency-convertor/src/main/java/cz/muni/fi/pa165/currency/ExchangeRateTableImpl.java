@@ -13,7 +13,7 @@ import javax.inject.Named;
  *
  * @author xmedved4
  */
-@Named
+//@Named
 public class ExchangeRateTableImpl implements ExchangeRateTable {
 
     private static Currency CZK = Currency.getInstance("CZK");
