@@ -2,6 +2,7 @@ package cz.muni.fi.pa165.currency;
 
 import java.math.BigDecimal;
 import java.util.Currency;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.core.Is.is;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -67,10 +68,12 @@ public class CurrencyConvertorImplTest {
 
     @Test
     public void testConvertWithExternalServiceFailure() throws ExternalServiceFailureException {
-        when(exchangeRateTableMock.getExchangeRate(USD, CZK)).thenThrow(ExternalServiceFailureException.class);
+        ExternalServiceFailureException externalServiceFailureException = new ExternalServiceFailureException("error");
+        when(exchangeRateTableMock.getExchangeRate(USD, CZK)).thenThrow(externalServiceFailureException);
         CurrencyConvertorImpl converter = new CurrencyConvertorImpl(exchangeRateTableMock);
         thrown.expect(UnknownExchangeRateException.class);
         thrown.expectMessage("Getting Exchange Rate Table failed");
+        thrown.expectCause(sameInstance(externalServiceFailureException));
         converter.convert(USD, CZK, BigDecimal.ONE);
     }
 
