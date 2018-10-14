@@ -11,6 +11,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import cz.fi.muni.pa165.entity.Category;
 import cz.fi.muni.pa165.entity.Product;
+import cz.fi.muni.pa165.enums.Color;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import javax.persistence.PersistenceException;
 
 public class MainJavaSe {
 
@@ -23,7 +27,7 @@ public class MainJavaSe {
         emf = Persistence.createEntityManagerFactory("default");
         try {
             // BEGIN YOUR CODE
-            task05();
+            task06();
             // END YOUR CODE
         } finally {
             emf.close();
@@ -47,7 +51,7 @@ public class MainJavaSe {
         category = new Category();
         category.setName("Musical");
         em1.persist(category);
-        
+
         em1.getTransaction().commit();
         em1.close();
 
@@ -89,8 +93,7 @@ public class MainJavaSe {
         em.merge(category);
         em.getTransaction().commit();
         em.close();
-        
-        
+
         // The code below is just testing code. Do not modify it
         EntityManager checkingEm = emf.createEntityManager();
         checkingEm.getTransaction().begin();
@@ -112,10 +115,20 @@ public class MainJavaSe {
         // * color=Color.BLACK
         // * dateAdded = 20-01-2011 - to fill java.util.Date use Calendar 
         //
+        EntityManager em1 = emf.createEntityManager();
+        em1.getTransaction().begin();
+        Product product = new Product();
+        product.setName("Guitar");
+        product.setColor(Color.BLACK);
+        Calendar calendar = new GregorianCalendar(2011, 0, 20);
+        product.setAddedDate(calendar.getTime());
+        em1.persist(product);
+        em1.getTransaction().commit();
+        em1.close();
+
         // Additional task: Change the underlying table of Product entity to be ESHOP_PRODUCTS. After you do this, check this by inspecting console output (the CREATE TABLE statement)
         //
         // To test your code uncomment the commented code at the end of this method.
-
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
         Product p = em.createQuery("select p from Product p", Product.class)
@@ -125,30 +138,39 @@ public class MainJavaSe {
 
         /**
          * TODO Uncomment the following test code after you are finished!
-         *
-         * assertEq(p.getName(), "Guitar"); Calendar cal =
-         * Calendar.getInstance(); cal.setTime(p.getAddedDate());
-         * assertEq(cal.get(Calendar.YEAR), 2011);
-         * assertEq(cal.get(Calendar.MONTH), 0);
-         * assertEq(cal.get(Calendar.DAY_OF_MONTH), 20);
-         * assertEq(cal.get(Calendar.MINUTE), 0); assertEq(p.getColor(),
-         * Color.BLACK); System.out .println("Found Guitar with correct values.
-         * Starting uniqueness test.");
-         *
-         * em = emf.createEntityManager(); em.getTransaction().begin(); Product
-         * p2 = new Product(); p2.setName("Guitar"); Product p3 = new Product();
-         * p3.setName("Violin"); em.persist(p3);
-         * System.out.println("Successfully persited Violin"); try {
-         * em.persist(p2);
-         *
-         * throw new RuntimeException( "Successfully saved new Product with the
-         * same name (Guitar) it should be unique!"); } catch
-         * (PersistenceException ex) { System.out .println("Unsuccessfully saved
-         * second object with name Guitar -> OK"); } em.close();
-         *
-         *
-         * System.out.println("Task6 ok!");
          */
+        System.out.println(p);
+        assertEq(p.getName(), "Guitar");
+        Calendar cal
+                = Calendar.getInstance();
+        cal.setTime(p.getAddedDate());
+        assertEq(cal.get(Calendar.YEAR), 2011);
+        assertEq(cal.get(Calendar.MONTH), 0);
+        assertEq(cal.get(Calendar.DAY_OF_MONTH), 20);
+        assertEq(cal.get(Calendar.MINUTE), 0);
+        assertEq(p.getColor(),
+                Color.BLACK);
+        System.out.println("Found Guitar with correct values. Starting uniqueness test.");
+
+        em = emf.createEntityManager();
+        em.getTransaction().begin();
+        Product p2 = new Product();
+        p2.setName("Guitar");
+        Product p3 = new Product();
+        p3.setName("Violin");
+        em.persist(p3);
+        System.out.println("Successfully persited Violin");
+        try {
+            em.persist(p2);
+
+            throw new RuntimeException("Successfully saved new Product with the same name (Guitar) it should be unique!");
+        } catch (PersistenceException ex) {
+            System.out.println("Unsuccessfully saved second object with name Guitar -> OK");
+        }
+        em.close();
+
+        System.out.println("Task6 ok!");
+
     }
 
     private static void task08() {
@@ -199,7 +221,7 @@ public class MainJavaSe {
 		} else System.out.println("INCORRECT!");
          */
     }
-
+    
     private static void assertEq(Object obj1, Object obj2) {
         if (!obj1.equals(obj2)) {
             throw new RuntimeException(
