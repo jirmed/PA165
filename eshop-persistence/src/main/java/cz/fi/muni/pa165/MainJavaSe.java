@@ -41,19 +41,22 @@ public class MainJavaSe {
         // You must first obtain the Entity manager
         // Then you have to start transaction using getTransaction().begin()
         // Then use persist() to persist both of the categories and finally commit the transaction
+        EntityManager em1 = emf.createEntityManager();;
+        try {
+            em1.getTransaction().begin();
+            Category category;
+            category = new Category();
+            category.setName("Electronics");
+            em1.persist(category);
+            category = new Category();
+            category.setName("Musical");
+            em1.persist(category);
 
-        EntityManager em1 = emf.createEntityManager();
-        em1.getTransaction().begin();
-        Category category;
-        category = new Category();
-        category.setName("Electronics");
-        em1.persist(category);
-        category = new Category();
-        category.setName("Musical");
-        em1.persist(category);
+            em1.getTransaction().commit();
 
-        em1.getTransaction().commit();
-        em1.close();
+        } finally {
+            em1.close();
+        }
 
         // The code below is just testing code. Do not modify it
         EntityManager em = emf.createEntityManager();
@@ -82,17 +85,21 @@ public class MainJavaSe {
         category.setName("Electronics");
         em.persist(category);
         em.getTransaction().commit();
+
         em.close();
 
         // TODO under this line. create new EM and start new transaction. Merge
         // the detached category
         // into the context and change the name to "Electro"
         em = emf.createEntityManager();
-        em.getTransaction().begin();
-        category.setName("Electro");
-        em.merge(category);
-        em.getTransaction().commit();
-        em.close();
+        try {
+            em.getTransaction().begin();
+            category = em.merge(category);
+            category.setName("Electro");
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
 
         // The code below is just testing code. Do not modify it
         EntityManager checkingEm = emf.createEntityManager();
@@ -116,15 +123,18 @@ public class MainJavaSe {
         // * dateAdded = 20-01-2011 - to fill java.util.Date use Calendar 
         //
         EntityManager em1 = emf.createEntityManager();
-        em1.getTransaction().begin();
-        Product product = new Product();
-        product.setName("Guitar");
-        product.setColor(Color.BLACK);
-        Calendar calendar = new GregorianCalendar(2011, 0, 20);
-        product.setAddedDate(calendar.getTime());
-        em1.persist(product);
-        em1.getTransaction().commit();
-        em1.close();
+        try {
+            em1.getTransaction().begin();
+            Product product = new Product();
+            product.setName("Guitar");
+            product.setColor(Color.BLACK);
+            Calendar calendar = new GregorianCalendar(2011, Calendar.JANUARY, 20);
+            product.setAddedDate(calendar.getTime());
+            em1.persist(product);
+            em1.getTransaction().commit();
+        } finally {
+            em1.close();
+        }
 
         // Additional task: Change the underlying table of Product entity to be ESHOP_PRODUCTS. After you do this, check this by inspecting console output (the CREATE TABLE statement)
         //
@@ -182,46 +192,51 @@ public class MainJavaSe {
         //TODO after you implement equals nad hashCode, you can uncomment the code below. It will try
         // to check whether you are doing everything correctly. 
         /* TODO uncomment the following (it should work if you were successfull with task08)
-*/
+         */
+        class MockProduct extends Product {
 
-		class MockProduct extends Product {
-			private boolean getNameCalled = false;
-			@Override
-			public String getName() {
-				getNameCalled = true;
-				return super.getName();
-			}
-		}
-		
-		Product p = new Product();
-		p.setName("X");
-		p.setId(2l);
-		Product p2 = new Product();
-		p2.setName("X");
-		p2.setId(4l);
-		MockProduct mp = new MockProduct();
-		mp.setName("X");
-		p.setId(3l);
-		
-		System.out.println("Your equals and hashcode should work on unique 'name' attribute");
-		if (p.equals(p2) && p.hashCode()==p2.hashCode()){
-			System.out.println("CORRECT");
-		} else System.out.println("INCORRECT!");
-		
-		
-		System.out.println("Your equals should use instanceof and not getClass()==");
-		if (p.equals(mp)){
-			System.out.println("CORRECT");
-		} else
-			System.out.println("INCORRECT!");
+            private boolean getNameCalled = false;
 
-		System.out.println("Your equals should call getter to get 'name' value on the other object, because other object may be a proxy class instance");
-		if (mp.getNameCalled){
-			System.out.println("CORRECT");
-		} else System.out.println("INCORRECT!");
-         
+            @Override
+            public String getName() {
+                getNameCalled = true;
+                return super.getName();
+            }
+        }
+
+        Product p = new Product();
+        p.setName("X");
+        p.setId(2l);
+        Product p2 = new Product();
+        p2.setName("X");
+        p2.setId(4l);
+        MockProduct mp = new MockProduct();
+        mp.setName("X");
+        p.setId(3l);
+
+        System.out.println("Your equals and hashcode should work on unique 'name' attribute");
+        if (p.equals(p2) && p.hashCode() == p2.hashCode()) {
+            System.out.println("CORRECT");
+        } else {
+            System.out.println("INCORRECT!");
+        }
+
+        System.out.println("Your equals should use instanceof and not getClass()==");
+        if (p.equals(mp)) {
+            System.out.println("CORRECT");
+        } else {
+            System.out.println("INCORRECT!");
+        }
+
+        System.out.println("Your equals should call getter to get 'name' value on the other object, because other object may be a proxy class instance");
+        if (mp.getNameCalled) {
+            System.out.println("CORRECT");
+        } else {
+            System.out.println("INCORRECT!");
+        }
+
     }
-    
+
     private static void assertEq(Object obj1, Object obj2) {
         if (!obj1.equals(obj2)) {
             throw new RuntimeException(
