@@ -6,16 +6,15 @@
 package cz.fi.muni.pa165.dao;
 
 import cz.fi.muni.pa165.PersistenceSampleApplicationContext;
-import cz.fi.muni.pa165.entity.Category;
 import cz.fi.muni.pa165.entity.Product;
 import java.util.List;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
-import static org.testng.Assert.*;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -26,15 +25,17 @@ import org.testng.annotations.Test;
  *
  * @author jiri21
  */
-
-@ContextConfiguration(classes=PersistenceSampleApplicationContext.class)
+@ContextConfiguration(classes = PersistenceSampleApplicationContext.class)
 @TestExecutionListeners(TransactionalTestExecutionListener.class)
 @Transactional
-public class ProductDaoImplNGTest {
-    
+public class ProductDaoImplNGTest extends AbstractTestNGSpringContextTests {
+
     @Inject
     private ProductDao productDao;
-    
+
+    private Product PRODUCT1;
+    private Product PRODUCT2;
+
     public ProductDaoImplNGTest() {
     }
 
@@ -48,6 +49,10 @@ public class ProductDaoImplNGTest {
 
     @BeforeMethod
     public void setUpMethod() throws Exception {
+        this.PRODUCT1 = createProductWithName("Test Product1");
+        this.PRODUCT2 = createProductWithName("Test Product2");
+        productDao.create(PRODUCT1);
+        productDao.create(PRODUCT2);
     }
 
     @AfterMethod
@@ -58,15 +63,45 @@ public class ProductDaoImplNGTest {
      * Test of create method, of class ProductDaoImpl.
      */
     @Test
-    public void testCreate() {
-        String name = "Test Product";
+    public void testCreateValidProduct() {
+        Product newProduct = createProductWithName("New Product");
+
+        productDao.create(newProduct);
+
+        List<Product> products = productDao.findAll();
+        Assert.assertTrue(products.contains(newProduct));
+    }
+
+    /**
+     * Tests create method with a duplicate name
+     */
+    @Test(expectedExceptions = javax.persistence.PersistenceException.class)
+    public void testCreateDuplicateName() {
+        Product duplicateProduct = createProductWithName(PRODUCT1.getName());
+        productDao.create(duplicateProduct);
+    }
+
+    /**
+     * Tests create method with null in name
+     */
+    @Test(expectedExceptions = javax.validation.ConstraintViolationException.class)
+    public void testCreateNullName() {
+        Product nullNameProduct = createProductWithName(null);
+        productDao.create(nullNameProduct);
+    }
+
+    /**
+     * Test create method with null
+     */
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testCreateNull() {
+        productDao.create(null);
+    }
+
+    private Product createProductWithName(String name) {
         Product product = new Product();
         product.setName(name);
-        productDao.create(product);
-        
-        List<Product> products = productDao.findByName(name);
-        assertEquals(products.size(), 1);
-        
+        return product;
     }
 
     /**
@@ -74,13 +109,10 @@ public class ProductDaoImplNGTest {
      */
     @Test
     public void testFindAll() {
-        System.out.println("findAll");
-        ProductDaoImpl instance = new ProductDaoImpl();
-        List expResult = null;
-        List result = instance.findAll();
-        assertEquals(result, expResult);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        List<Product> products = productDao.findAll();
+        Assert.assertEquals(products.size(), 2);
+        Assert.assertTrue(products.contains(PRODUCT1));
+        Assert.assertTrue(products.contains(PRODUCT2));
     }
 
     /**
@@ -88,14 +120,8 @@ public class ProductDaoImplNGTest {
      */
     @Test
     public void testFindById() {
-        System.out.println("findById");
-        Long id = null;
-        ProductDaoImpl instance = new ProductDaoImpl();
-        Product expResult = null;
-        Product result = instance.findById(id);
-        assertEquals(result, expResult);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        Product product = productDao.findById(PRODUCT1.getId());
+        Assert.assertEquals(product, PRODUCT1);
     }
 
     /**
@@ -103,12 +129,11 @@ public class ProductDaoImplNGTest {
      */
     @Test
     public void testRemove() {
-        System.out.println("remove");
-        Product p = null;
-        ProductDaoImpl instance = new ProductDaoImpl();
-        instance.remove(p);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+
+        productDao.remove(PRODUCT1);
+        List<Product> products = productDao.findAll();
+
+        Assert.assertFalse(products.contains(PRODUCT1));
     }
 
     /**
@@ -116,14 +141,9 @@ public class ProductDaoImplNGTest {
      */
     @Test
     public void testFindByName() {
-        System.out.println("findByName");
-        String name = "";
-        ProductDaoImpl instance = new ProductDaoImpl();
-        List expResult = null;
-        List result = instance.findByName(name);
-        assertEquals(result, expResult);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        List<Product> products = productDao.findByName(PRODUCT1.getName());
+        Assert.assertEquals(products.size(), 1);
+        Assert.assertTrue(products.contains(PRODUCT1));
     }
-    
+
 }

@@ -39,6 +39,8 @@ public class Product {
 
     private String imageMimeType;
 
+    @NotNull
+    @Column(nullable = false, unique = true)
     private String name;
 
     /*
@@ -62,7 +64,7 @@ public class Product {
     public void setId(Long id) {
         this.id = id;
     }
-    
+
     @ManyToMany(mappedBy = "products")
     private Set<Category> categories = new HashSet<Category>();
 
@@ -88,6 +90,7 @@ public class Product {
         categories.add(c);
         c.addProduct(this);
     }
+
     public Set<Category> getCategories() {
         return Collections.unmodifiableSet(categories);
     }
