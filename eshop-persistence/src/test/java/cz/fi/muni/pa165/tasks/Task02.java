@@ -19,6 +19,7 @@ import cz.fi.muni.pa165.entity.Product;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = PersistenceSampleApplicationContext.class)
 public class Task02 extends AbstractTestNGSpringContextTests {
@@ -43,12 +44,13 @@ public class Task02 extends AbstractTestNGSpringContextTests {
 
             flashlight = persitProductWithName(em, "Flashlight");
             electro.addProduct(flashlight);
+//            flashlight.addCategory(electro);
 
             kitchenRobot = persitProductWithName(em, "Kitchen Robot");
             electro.addProduct(kitchenRobot);
             kitchen.addProduct(kitchenRobot);
 
-            Product plate = persitProductWithName(em, "Plate");
+            plate = persitProductWithName(em, "Plate");
             kitchen.addProduct(plate);
 
             em.getTransaction().commit();
@@ -77,13 +79,15 @@ public class Task02 extends AbstractTestNGSpringContextTests {
         EntityManager em = emf.createEntityManager();
         Set<Product> products;
         try {
-            em.merge(electro);
+            electro = em.merge(electro);
             products = electro.getProducts();
+
+            assertContainsProductWithName(products, "Flashlight");
+            assertContainsProductWithName(products, "Kitchen Robot");
+
         } finally {
             em.close();
         }
-        assertContainsProductWithName(products, "Flashlight");
-        assertContainsProductWithName(products, "Kitchen Robot");
     }
 
     @Test
@@ -91,13 +95,14 @@ public class Task02 extends AbstractTestNGSpringContextTests {
         EntityManager em = emf.createEntityManager();
         Set<Product> products;
         try {
-            em.merge(kitchen);
+            kitchen = em.merge(kitchen);
             products = kitchen.getProducts();
+
+            assertContainsProductWithName(products, "Plate");
+            assertContainsProductWithName(products, "Kitchen Robot");
         } finally {
             em.close();
         }
-        assertContainsProductWithName(products, "Plate");
-        assertContainsProductWithName(products, "Kitchen Robot");
     }
 
     @Test
@@ -105,14 +110,42 @@ public class Task02 extends AbstractTestNGSpringContextTests {
         EntityManager em = emf.createEntityManager();
         Set<Category> categories;
         try {
-            em.merge(flashlight);
+            flashlight = em.merge(flashlight);
             categories = flashlight.getCategories();
+            assertContainsCategoryWithName(categories, "Electro");
         } finally {
             em.close();
         }
-        assertContainsCategoryWithName(categories, "Electro");
+    }
+    
+        @Test
+    public void productKitchenRobotTest() {
+        EntityManager em = emf.createEntityManager();
+        Set<Category> categories;
+        try {
+            kitchenRobot = em.merge(kitchenRobot);
+            categories = kitchenRobot.getCategories();
+            assertContainsCategoryWithName(categories, "Electro");
+            assertContainsCategoryWithName(categories, "Kitchen");
+        } finally {
+            em.close();
+        }
     }
 
+        @Test
+    public void productPlateTest() {
+        EntityManager em = emf.createEntityManager();
+        Set<Category> categories;
+        try {
+            plate = em.merge(plate);
+            categories = plate.getCategories();
+            assertContainsCategoryWithName(categories, "Kitchen");
+        } finally {
+            em.close();
+        }
+    }
+
+    
     private void assertContainsCategoryWithName(Set<Category> categories,
             String expectedCategoryName) {
         for (Category cat : categories) {
