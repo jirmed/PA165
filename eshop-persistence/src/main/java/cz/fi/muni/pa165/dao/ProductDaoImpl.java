@@ -19,27 +19,27 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public void create(Product p) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        em.persist(p);
     }
 
     @Override
     public List<Product> findAll() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return em.createQuery("SELECT p from Product p",Product.class).getResultList();
     }
 
     @Override
     public Product findById(Long id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return em.find(Product.class, id);
     }
 
     @Override
     public void remove(Product p) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        em.remove(p);
     }
 
     @Override
     public List<Product> findByName(String name) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return em.createQuery("SELECT p from Product p where name= :name",Product.class).setParameter("name", name).getResultList();
     }
     
 }
