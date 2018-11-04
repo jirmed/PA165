@@ -7,29 +7,34 @@
 
 <fmt:message var="title" key="example.title"/>
 <my:pagetemplate title="${title}">
-<jsp:attribute name="body">
+    <jsp:attribute name="body">
 
-    <p class="alert alert-warning"><fmt:message key="example.text1"/></p>
-    <table class="table table-bordered">
-        <thead>
-        <tr><th><fmt:message key="example.attribute"/></th><th><fmt:message key="example.value"/></th></tr>
-        </thead>
-        <tbody>
-        <tr><th>a</th><td><c:out value="${a}"/></td></tr>
-        <tr><th>r1</th><td><c:out value="${r1}"/></td></tr>
-        <tr><th>r2</th><td><c:out value="${r2}"/></td></tr>
-        <tr><th>b</th><td><c:out value="${b}"/></td></tr>
-        <tr><th>locale</th><td><c:out value="${locale}"/></td></tr>
-        <tr><th>httpMethod</th><td><c:out value="${httpMethod}"/></td></tr>
-        <tr><th>userAgent</th><td><c:out value="${userAgent}"/></td></tr>
-        <tr>
-            <th>session_cookie</th>
-            <td><c:if test="${not empty session_cookie}"> <c:out value="${session_cookie.name}"/>=<c:out value="${session_cookie.value}"/></c:if></td>
-        </tr>
-        </tbody>
-    </table>
+        <p class="alert alert-warning"><fmt:message key="example.text1"/></p>
+        <table class="table table-bordered">
+            <thead>
+                <tr><th><fmt:message key="example.attribute"/></th><th><fmt:message key="example.value"/></th></tr>
+            </thead>
+            <tbody>
+                <tr><th>a</th><td><c:out value="${a}"/></td></tr>
+                <tr><th>r1</th><td><c:out value="${r1}"/></td></tr>
+                <tr><th>r2</th><td><c:out value="${r2}"/></td></tr>
+                <tr><th>b</th><td><c:out value="${b}"/></td></tr>
+                <tr><th>locale</th><td><c:out value="${locale}"/></td></tr>
+                <tr><th>httpMethod</th><td><c:out value="${httpMethod}"/></td></tr>
+                <tr><th>userAgent</th><td><c:out value="${userAgent}"/></td></tr>
+                <tr>
+                    <th>session_cookie</th>
+                    <td><c:if test="${not empty session_cookie}"> <c:out value="${session_cookie.name}"/>=<c:out value="${session_cookie.value}"/></c:if></td>
+                    </tr>
+                </tbody>
+            </table>
 
-     <p><a class="btn btn-lg btn-success" href="${pageContext.request.contextPath}/example/foo/1/platypus55?b=42&redir=true"
-           role="button"><fmt:message key="example.redirect.button"/></a></p>
-</jsp:attribute>
+            <p>
+                <a class="btn btn-lg btn-success" 
+                   href="${pageContext.request.contextPath}/example/foo/1/platypus55?b=42&redir=true"
+                role="button">
+                <fmt:message key="example.redirect.button"/>
+            </a>
+        </p>
+    </jsp:attribute>
 </my:pagetemplate>

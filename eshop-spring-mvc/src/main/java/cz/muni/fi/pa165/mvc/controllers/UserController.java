@@ -1,5 +1,6 @@
 package cz.muni.fi.pa165.mvc.controllers;
 
+import cz.fi.muni.pa165.facade.UserFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,14 @@ import java.util.Locale;
  * @author Martin Kuba makub@ics.muni.cz
  */
 @Controller
-@RequestMapping("/example")
-public class ExampleController {
+@RequestMapping("/user")
+public class UserController {
 
-    final static Logger log = LoggerFactory.getLogger(ExampleController.class);
+    final static Logger log = LoggerFactory.getLogger(UserController.class);
+    
+    
+    @Autowired
+    private UserFacade userFacade;
 
     @Autowired
     private MessageSource messageSource; //resource bundle provided by Spring
@@ -106,5 +111,12 @@ public class ExampleController {
 
         return "/bar";
     }
+
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public String list(Model model) {
+        model.addAttribute("users",userFacade.getAllUsers());
+        return "/user/list";
+    }
+    
 
 }
