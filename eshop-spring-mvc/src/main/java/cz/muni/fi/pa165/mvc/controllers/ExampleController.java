@@ -35,11 +35,14 @@ public class ExampleController {
     private MessageSource messageSource; //resource bundle provided by Spring
 
     /**
-     * Example method. Shows what is possible to receive from SpringMVC as method parameters,
-     * how to pass values through Model to view, and how to do redirects.
+     * Example method. Shows what is possible to receive from SpringMVC as
+     * method parameters, how to pass values through Model to view, and how to
+     * do redirects.
      * <p>
-     * See  http://docs.spring.io/spring/docs/current/spring-framework-reference/html/mvc.html#mvc-ann-arguments for details.
-     * Call with <code>/example/foo/1/bar99?b=333&redir=false</code>.
+     * See
+     * http://docs.spring.io/spring/docs/current/spring-framework-reference/html/mvc.html#mvc-ann-arguments
+     * for details. Call with
+     * <code>/example/foo/1/bar99?b=333&redir=false</code>.
      *
      * @return view name
      */
@@ -81,13 +84,28 @@ public class ExampleController {
             //flash attribute exists only on the first request after redirect, good for displaying temporary messages
             redirectAttributes.addFlashAttribute("alert_info", message);
             //build a URL for redirect
-            String url =
-                    uriBuilder.path("/example/foo/{a}/{r1}{r2}") // application-relative URL with template variables
-                            .queryParam("b", b + 1) // add query parameter
-                            .buildAndExpand(a + 1, r1 + "xxx", r2 + 1) // replace template variables with values in given order
-                            .encode().toUriString();
+            String url
+                    = uriBuilder.path("/example/foo/{a}/{r1}{r2}") // application-relative URL with template variables
+                    .queryParam("b", b + 1) // add query parameter
+                    .buildAndExpand(a + 1, r1 + "xxx", r2 + 1) // replace template variables with values in given order
+                    .encode().toUriString();
             return "redirect:" + url;
         }
+    }
+
+    @RequestMapping(value = "/bar", method = RequestMethod.GET)
+    public String bar(
+            
+            @RequestParam String c,
+            @RequestParam int d,
+            @RequestParam Boolean e,
+            Model model
+    ) {
+        model.addAttribute("c", c);
+        model.addAttribute("d", d);
+        model.addAttribute("e", e);
+
+        return "bar";
     }
 
 }
