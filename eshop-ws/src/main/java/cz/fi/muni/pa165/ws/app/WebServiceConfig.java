@@ -73,4 +73,22 @@ public class WebServiceConfig extends WsConfigurerAdapter {
         return new SimpleXsdSchema(new ClassPathResource("products.xsd"));
     }
 
+    /**
+     *
+     */
+    @Bean
+    public PayloadValidatingInterceptor myPayloadValidatingInterceptor() {
+        final PayloadValidatingInterceptor interceptor = new PayloadValidatingInterceptor();
+        interceptor.setXsdSchema(productsSchema());
+        interceptor.setValidateRequest(false);
+        interceptor.setValidateResponse(true);
+        return interceptor;
+    }
+
+    @Override
+    public void addInterceptors(List<EndpointInterceptor> interceptors) {
+        interceptors.add(myPayloadValidatingInterceptor());
+        super.addInterceptors(interceptors); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }
