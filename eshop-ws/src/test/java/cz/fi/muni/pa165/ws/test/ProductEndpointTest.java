@@ -64,8 +64,60 @@ public class ProductEndpointTest extends AbstractTestNGSpringContextTests {
 
     
     // TODO1: add a test method to test for an invalid product request
+    @Test
+    public void productEndpointGetProductRequestNoResult() throws Exception {
+        
+//        final List<Product> products = this.createProducts();
+        doReturn(null).when(productRepository).getProductByName("XXX");
+                
+        Source requestPayload = new StringSource(
+                "<getProductRequestByName xmlns='http://muni.fi.cz/pa165/ws/entities/products'>"
+                + "<name>XXX</name>"
+                + "</getProductRequestByName>");
+
+        Source responsePayload = new StringSource(
+                "<ns2:getProductResponse xmlns:ns2='http://muni.fi.cz/pa165/ws/entities/products'"
+                + " xmlns:ns3='http://muni.fi.cz/pa165/ws/entities/prices'>"
+                + "<ns2:product><ns2:id>1</ns2:id><ns2:name>Raspberry PI</ns2:name><ns2:description>miniPC"
+                + "</ns2:description><ns2:color>GREEN</ns2:color>"
+                + "<ns2:price><ns3:id>0</ns3:id><ns3:value>35.99</ns3:value><ns3:currency>CZK</ns3:currency></ns2:price> "       
+                + "</ns2:product></ns2:getProductResponse>");
+
+        mockClient.sendRequest(withPayload(requestPayload)).
+                andExpect(serverOrReceiverFault("Product not found."));
+    }
     
-    
+    @Test
+    public void productEndpointGetProductsRequest() throws Exception {
+        
+        final List<Product> products = this.createProducts();
+        doReturn(products).when(productRepository).getProducts();
+                
+        Source requestPayload = new StringSource(
+                "<getProductsRequest xmlns='http://muni.fi.cz/pa165/ws/entities/products'>"
+                + "</getProductsRequest>");
+
+    Source responsePayload = new StringSource(
+                "<ns2:getProductResponse xmlns:ns2='http://muni.fi.cz/pa165/ws/entities/products'"
+                + " xmlns:ns3='http://muni.fi.cz/pa165/ws/entities/prices' >"        
+                + "<ns2:product><ns2:id>1</ns2:id><ns2:name>Raspberry PI</ns2:name><ns2:description>miniPC</ns2:description>"
+                + "<ns2:price><ns3:id>0</ns3:id><ns3:value>35.99</ns3:value><ns3:currency>CZK</ns3:currency></ns2:price> "
+                + "<ns2:color>GREEN</ns2:color>"
+                + "</ns2:product>"
+                + "<ns2:product><ns2:id>2</ns2:id><ns2:name>Arduino Uno</ns2:name><ns2:description>miniPC</ns2:description>"
+                + "<ns2:price><ns3:id>0</ns3:id><ns3:value>45.99</ns3:value><ns3:currency>CZK</ns3:currency></ns2:price> "
+                + "<ns2:color>BLUE</ns2:color>"
+                + "</ns2:product>"
+                + "<ns2:product><ns2:id>3</ns2:id><ns2:name>Arduino Zero</ns2:name><ns2:description>miniPC</ns2:description>"
+                + "<ns2:price><ns3:id>0</ns3:id><ns3:value>55.99</ns3:value><ns3:currency>CZK</ns3:currency></ns2:price> "
+                + "<ns2:color>BLUE</ns2:color>"
+                + "</ns2:product>"
+                        
+                +        "</ns2:getProductResponse>");
+
+        mockClient.sendRequest(withPayload(requestPayload)).
+                andExpect(payload(responsePayload));
+    }    
     
     // TODO2: add a test method for all products. You can check it against a response as the following: 
 //    
